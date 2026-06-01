@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TypeFlow</title>
+  <style>
+    :root {
+      --bg: #141516;
+      --panel: #202124;
+      --panel-2: #282a2e;
+      --text: #f2f0ea;
+      --muted: #a8a39a;
+      --accent: #f5c451;
+      --good: #54d6a3;
+      --blue: #6cb6ff;
+      --bad: #ff6b6b;
+      --line: #3b3d42;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(84, 214, 163, 0.12), transparent 24rem),
+        radial-gradient(circle at 92% 8%, rgba(245, 196, 81, 0.1), transparent 22rem),
+        var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .logo {
+      width: 36px;
+      height: 28px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .logo span {
+      border-radius: 4px;
+      background: var(--accent);
+    }
+
+    .top-note {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .section {
+      border-top: 1px solid var(--line);
+      padding: 22px 0 26px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 14px;
+      color: var(--muted);
+      background: var(--panel);
+      font-weight: 800;
+      cursor: pointer;
+      transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    button:hover,
+    button.active {
+      color: var(--accent);
+      border-color: rgba(245, 196, 81, 0.75);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mode-card {
+      min-height: 92px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: left;
+      color: var(--text);
+      background: rgba(32, 33, 36, 0.84);
+    }
+
+    .mode-card span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .time-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat,
+    .player {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(32, 33, 36, 0.84);
+      padding: 15px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .value {
+      margin-top: 8px;
+      color: var(--accent);
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .typing-box {
+      position: relative;
+      min-height: 226px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(32, 33, 36, 0.8);
+      padding: 28px;
+      overflow: hidden;
+      cursor: text;
+    }
+
+    .typing-box:focus-within {
+      border-color: rgba(245, 196, 81, 0.8);
+      box-shadow: 0 0 0 3px rgba(245, 196, 81, 0.08);
+    }
+
+    .words {
+      position: relative;
+      z-index: 1;
+      min-height: 162px;
+      max-height: 162px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 28px;
+      line-height: 1.55;
+      letter-spacing: 0;
+      word-break: break-word;
+    }
+
+    .hidden-input {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      resize: none;
+      opacity: 0;
+      cursor: text;
+    }
+
+    .char.correct {
+      color: var(--text);
+    }
+
+    .char.wrong {
+      color: var(--bad);
+      background: rgba(255, 107, 107, 0.13);
+      border-radius: 3px;
+    }
+
+    .char.current {
+      color: var(--accent);
+      position: relative;
+    }
+
+    .char.current::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -5px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      background: rgba(20, 21, 22, 0.9);
+      backdrop-filter: blur(7px);
+    }
+
+    .screen.show {
+      display: grid;
+    }
+
+    .celebration-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .winner-toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      z-index: 21;
+      width: min(420px, calc(100% - 32px));
+      transform: translateX(-50%);
+      border: 1px solid rgba(245, 196, 81, 0.7);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      color: var(--text);
+      background: rgba(32, 33, 36, 0.96);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      animation: toastPop 3.2s ease forwards;
+    }
+
+    .winner-toast strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--accent);
+      font-size: 24px;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -18px;
+      width: 10px;
+      height: 16px;
+      border-radius: 3px;
+      opacity: 0;
+      animation: confettiFall var(--fall-time) linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        opacity: 1;
+        transform: translateY(-20px) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(calc(100vh + 80px)) rotate(var(--spin));
+      }
+    }
+
+    @keyframes toastPop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -18px) scale(0.96);
+      }
+      12%,
+      78% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -12px) scale(0.98);
+      }
+    }
+
+    .result {
+      width: min(560px, 100%);
+    }
+
+    .result h1 {
+      margin: 0 0 18px;
+      font-size: 34px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .mini-stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--panel);
+    }
+
+    .mini-stat b {
+      display: block;
+      margin-top: 6px;
+      color: var(--accent);
+      font-size: 24px;
+    }
+
+    .challenge-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .challenge-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(32, 33, 36, 0.72);
+      padding: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: var(--text);
+      background: #17181a;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(108, 182, 255, 0.8);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .code-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+      margin: 14px 0;
+      border: 1px dashed rgba(108, 182, 255, 0.56);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--blue);
+      background: rgba(108, 182, 255, 0.08);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .status {
+      min-height: 21px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .players {
+      display: grid;
+      gap: 10px;
+    }
+
+    .player-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .player-meta {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .meter {
+      height: 10px;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #17181a;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--good), var(--blue));
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer strong {
+      color: var(--good);
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        width: min(100% - 22px, 1120px);
+        padding-top: 18px;
+      }
+
+      header,
+      .section-head,
+      .time-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-note {
+        text-align: left;
+      }
+
+      .mode-grid,
+      .stats,
+      .challenge-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar,
+      .action-row {
+        width: 100%;
+      }
+
+      button {
+        flex: 1 1 auto;
+      }
+
+      .typing-box {
+        padding: 20px;
+      }
+
+      .words {
+        min-height: 230px;
+        max-height: 230px;
+        font-size: 22px;
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="celebration-layer" id="celebrationLayer" aria-hidden="true"></div>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+        TypeFlow
+      </div>
+      <div class="top-note">Practice alone or create a live race code.</div>
+    </header>
+
+    <section class="section" aria-labelledby="practice-title">
+      <div class="section-head">
+        <div>
+          <h2 id="practice-title">Practice</h2>
+          <p class="hint">Choose the type of text you want to train.</p>
+        </div>
+      </div>
+      <div class="mode-grid">
+        <button class="mode-card active" data-mode="words">Words<span>Simple typing with common words.</span></button>
+        <button class="mode-card" data-mode="numbers">Numbers<span>Digits and number groups.</span></button>
+        <button class="mode-card" data-mode="commas">Commas<span>Words with comma practice.</span></button>
+        <button class="mode-card" data-mode="quotes">Quotes<span>Short quoted sentences.</span></button>
+        <button class="mode-card" data-mode="mixed">Mixed<span>Words, numbers, commas, and quotes.</span></button>
+      </div>
+      <div class="time-row">
+        <p class="hint">Choose test time.</p>
+        <div class="toolbar">
+          <button class="time active" data-time="60">1 min</button>
+          <button class="time" data-time="120">2 min</button>
+          <button class="time" data-time="180">3 min</button>
+          <button class="time" data-time="240">4 min</button>
+          <button class="time" data-time="300">5 min</button>
+          <button id="restart">Restart</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="test-title">
+      <div class="section-head">
+        <div>
+          <h2 id="test-title">Typing Test</h2>
+          <p class="hint">Click the text and start typing. Results update live.</p>
+        </div>
+      </div>
+
+      <div class="stats" aria-label="Typing stats">
+        <div class="stat">
+          <div class="label">time</div>
+          <div class="value" id="time">1:00</div>
+        </div>
+        <div class="stat">
+          <div class="label">wpm</div>
+          <div class="value" id="wpm">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">acc</div>
+          <div class="value" id="acc">100%</div>
+        </div>
+        <div class="stat">
+          <div class="label">errors</div>
+          <div class="value" id="errors">0</div>
+        </div>
+      </div>
+
+      <div class="typing-box" id="typingBox" tabindex="0" aria-label="Typing test">
+        <textarea class="hidden-input" id="input" aria-label="Typing input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div class="words" id="words"></div>
+        <div class="screen" id="screen">
+          <div class="result">
+            <h1>Result</h1>
+            <div class="result-grid">
+              <div class="mini-stat"><span>wpm</span><b id="finalWpm">0</b></div>
+              <div class="mini-stat"><span>accuracy</span><b id="finalAcc">100%</b></div>
+              <div class="mini-stat"><span>errors</span><b id="finalErrors">0</b></div>
+            </div>
+            <button id="again">Try again</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="challenge-title">
+      <div class="section-head">
+        <div>
+          <h2 id="challenge-title">Challenge</h2>
+          <p class="hint">Create a new code or join a code to race another player on the same server.</p>
+        </div>
+      </div>
+
+      <div class="challenge-layout">
+        <div class="challenge-panel">
+          <div class="field">
+            <label for="playerName">Your name</label>
+            <input id="playerName" maxlength="18" placeholder="Player" />
+          </div>
+          <div class="action-row">
+            <button id="createChallenge">Create code</button>
+            <button id="copyCode">Copy code</button>
+          </div>
+          <div class="code-box" id="roomCode">------</div>
+          <div class="field">
+            <label for="joinCode">Join code</label>
+            <input id="joinCode" maxlength="8" placeholder="ABC123" />
+          </div>
+          <div class="action-row">
+            <button id="joinChallenge">Join challenge</button>
+            <button id="leaveChallenge">Leave</button>
+          </div>
+          <p class="status" id="challengeStatus">Start the server, then create or join a challenge.</p>
+        </div>
+
+        <div class="players" id="players">
+          <div class="empty">No active challenge yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <strong>TypeFlow</strong> stores the race in the running server only. Every new challenge gets a new code.
+    </footer>
+  </div>
+
+  <script>
+    const wordBank = [
+      "future", "quiet", "silver", "garden", "simple", "motion", "bright", "typing",
+      "wonder", "planet", "coffee", "window", "signal", "memory", "little", "object",
+      "orange", "forest", "canvas", "pocket", "school", "smooth", "rocket", "number",
+      "circle", "button", "friend", "stream", "branch", "summer", "winter", "castle",
+      "engine", "reason", "yellow", "purple", "market", "visual", "energy", "honest",
+      "lesson", "center", "shadow", "travel", "phrase", "minute", "record", "custom",
+      "change", "office", "create", "public", "design", "studio", "letter", "steady"
+    ];
+
+    const commaBank = [
+      "pause, type, continue", "read, think, write", "slow, clean, correct",
+      "start, focus, finish", "left, right, center", "small, clear, useful",
+      "today, tomorrow, later", "one, two, three", "plan, build, test"
+    ];
+
+    const quoteBank = [
+      "\"type with calm\"", "\"speed follows accuracy\"", "\"focus on the next word\"",
+      "\"small steps count\"", "\"practice makes rhythm\"", "\"clean typing wins\"",
+      "\"keep your hands steady\"", "\"accuracy before speed\""
+    ];
+
+    const modes = {
+      words: () => wordBank[Math.floor(Math.random() * wordBank.length)],
+      numbers: () => String(Math.floor(100 + Math.random() * 9900)),
+      commas: () => commaBank[Math.floor(Math.random() * commaBank.length)],
+      quotes: () => quoteBank[Math.floor(Math.random() * quoteBank.length)],
+      mixed: () => {
+        const makers = [modes.words, modes.numbers, modes.commas, modes.quotes];
+        return makers[Math.floor(Math.random() * makers.length)]();
+      }
+    };
+
+    const wordsEl = document.getElementById("words");
+    const box = document.getElementById("typingBox");
+    const inputEl = document.getElementById("input");
+    const timeEl = document.getElementById("time");
+    const wpmEl = document.getElementById("wpm");
+    const accEl = document.getElementById("acc");
+    const errorsEl = document.getElementById("errors");
+    const screen = document.getElementById("screen");
+    const finalWpm = document.getElementById("finalWpm");
+    const finalAcc = document.getElementById("finalAcc");
+    const finalErrors = document.getElementById("finalErrors");
+    const restartBtn = document.getElementById("restart");
+    const againBtn = document.getElementById("again");
+    const modeBtns = document.querySelectorAll(".mode-card");
+    const timeBtns = document.querySelectorAll(".time");
+    const playerName = document.getElementById("playerName");
+    const joinCode = document.getElementById("joinCode");
+    const createChallengeBtn = document.getElementById("createChallenge");
+    const joinChallengeBtn = document.getElementById("joinChallenge");
+    const copyCodeBtn = document.getElementById("copyCode");
+    const leaveChallengeBtn = document.getElementById("leaveChallenge");
+    const roomCodeEl = document.getElementById("roomCode");
+    const challengeStatus = document.getElementById("challengeStatus");
+    const playersEl = document.getElementById("players");
+    const celebrationLayer = document.getElementById("celebrationLayer");
+
+    let mode = "words";
+    let duration = 60;
+    let text = "";
+    let typed = "";
+    let started = false;
+    let finished = false;
+    let startTime = 0;
+    let timer = null;
+    let challenge = { code: "", playerId: "", poll: null, lastSent: 0 };
+    let celebratedWinner = "";
+
+    function makeText(textMode) {
+      const parts = [];
+      const count = textMode === "numbers" ? 420 : 300;
+      for (let i = 0; i < count; i++) {
+        parts.push(modes[textMode]());
+      }
+      return parts.join(" ");
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const rest = seconds % 60;
+      return minutes + ":" + String(rest).padStart(2, "0");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function renderWords() {
+      wordsEl.innerHTML = "";
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement("span");
+        span.textContent = text[i];
+        span.className = "char";
+
+        if (i < typed.length) {
+          span.classList.add(typed[i] === text[i] ? "correct" : "wrong");
+        }
+
+        if (i === typed.length && !finished) {
+          span.classList.add("current");
+        }
+
+        wordsEl.appendChild(span);
+      }
+
+      const current = wordsEl.querySelector(".current");
+      if (current) {
+        wordsEl.scrollTop = Math.max(0, current.offsetTop - 52);
+      }
+    }
+
+    function getStats() {
+      let correct = 0;
+      let errors = 0;
+
+      for (let i = 0; i < typed.length; i++) {
+        if (typed[i] === text[i]) correct++;
+        else errors++;
+      }
+
+      const elapsed = started ? Math.max((Date.now() - startTime) / 1000, 1) : 1;
+      const wpm = Math.round((correct / 5) / (elapsed / 60));
+      const acc = typed.length ? Math.round((correct / typed.length) * 100) : 100;
+      const progress = text ? Math.min(100, Math.round((typed.length / text.length) * 100)) : 0;
+
+      return { wpm, acc, errors, progress };
+    }
+
+    function updateStats() {
+      const stats = getStats();
+      const remaining = started
+        ? Math.max(0, duration - Math.floor((Date.now() - startTime) / 1000))
+        : duration;
+
+      timeEl.textContent = formatTime(remaining);
+      wpmEl.textContent = stats.wpm;
+      accEl.textContent = stats.acc + "%";
+      errorsEl.textContent = stats.errors;
+
+      if (started && remaining <= 0) finish();
+    }
+
+    function start() {
+      started = true;
+      startTime = Date.now();
+      timer = setInterval(updateStats, 250);
+    }
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      clearInterval(timer);
+      updateStats();
+
+      const stats = getStats();
+      finalWpm.textContent = stats.wpm;
+      finalAcc.textContent = stats.acc + "%";
+      finalErrors.textContent = stats.errors;
+      inputEl.disabled = true;
+      screen.classList.add("show");
+      sendProgress(true);
+    }
+
+    function reset(nextText) {
+      clearInterval(timer);
+      text = nextText || makeText(mode);
+      typed = "";
+      started = false;
+      finished = false;
+      startTime = 0;
+      inputEl.value = "";
+      inputEl.disabled = false;
+      screen.classList.remove("show");
+      renderWords();
+      updateStats();
+      inputEl.focus();
+      sendProgress(true);
+    }
+
+    function setMode(nextMode, shouldReset) {
+      mode = nextMode;
+      modeBtns.forEach((button) => button.classList.toggle("active", button.dataset.mode === mode));
+      if (shouldReset) {
+        leaveChallenge("Practice mode changed. Create a new challenge for this mode.");
+        reset();
+      }
+    }
+
+    function setDuration(seconds, shouldReset) {
+      duration = seconds;
+      timeBtns.forEach((button) => button.classList.toggle("active", Number(button.dataset.time) === duration));
+      if (shouldReset) {
+        leaveChallenge("Time changed. Create a new challenge for this time.");
+        reset();
+      } else {
+        updateStats();
+      }
+    }
+
+    function handleInput() {
+      if (finished) return;
+
+      typed = inputEl.value.slice(0, text.length);
+      inputEl.value = typed;
+
+      if (!started && typed.length) start();
+
+      if (typed.length >= text.length) finish();
+      renderWords();
+      updateStats();
+      sendProgress(false);
+    }
+
+    function getName() {
+      return playerName.value.trim() || "Player";
+    }
+
+    async function api(path, data) {
+      const options = data
+        ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }
+        : {};
+      const response = await fetch(path, options);
+      const json = await response.json();
+      if (!response.ok) throw new Error(json.error || "Server error");
+      return json;
+    }
+
+    function setChallengeStatus(message) {
+      challengeStatus.textContent = message;
+    }
+
+    function celebrateWinner(name) {
+      const colors = ["#f5c451", "#54d6a3", "#6cb6ff", "#ff6b6b", "#f28be6", "#ffffff"];
+      const toast = document.createElement("div");
+
+      celebrationLayer.innerHTML = "";
+      toast.className = "winner-toast";
+      toast.innerHTML = `<strong>${escapeHtml(name)} wins</strong><span>Great race. Challenge complete.</span>`;
+      celebrationLayer.appendChild(toast);
+
+      for (let i = 0; i < 90; i++) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 0.9 + "s";
+        piece.style.setProperty("--fall-time", 2.2 + Math.random() * 1.8 + "s");
+        piece.style.setProperty("--spin", (180 + Math.random() * 720) + "deg");
+        celebrationLayer.appendChild(piece);
+      }
+
+      setTimeout(() => {
+        celebrationLayer.innerHTML = "";
+      }, 4300);
+    }
+
+    function updateRoomCode(code) {
+      roomCodeEl.textContent = code || "------";
+    }
+
+    function stopPolling() {
+      if (challenge.poll) clearInterval(challenge.poll);
+      challenge.poll = null;
+    }
+
+    function leaveChallenge(message) {
+      stopPolling();
+      challenge = { code: "", playerId: "", poll: null, lastSent: 0 };
+      celebratedWinner = "";
+      celebrationLayer.innerHTML = "";
+      updateRoomCode("");
+      playersEl.innerHTML = '<div class="empty">No active challenge yet.</div>';
+      if (message) setChallengeStatus(message);
+    }
+
+    function applyRoom(room, playerId, message) {
+      stopPolling();
+      challenge = { code: room.code, playerId, poll: null, lastSent: 0 };
+      celebratedWinner = "";
+      updateRoomCode(room.code);
+      setMode(room.mode, false);
+      setDuration(room.duration, false);
+      reset(room.text);
+      renderPlayers(room);
+      setChallengeStatus(message);
+      challenge.poll = setInterval(loadRoom, 900);
+      sendProgress(true);
+    }
+
+    async function createChallenge() {
+      try {
+        const data = await api("/api/create", { name: getName(), mode, duration });
+        applyRoom(data.room, data.playerId, "New challenge created. Share this code.");
+      } catch (error) {
+        setChallengeStatus("Challenge server is not running. Start it with: node server.js");
+      }
+    }
+
+    async function joinChallenge() {
+      const code = joinCode.value.trim().toUpperCase();
+      if (!code) {
+        setChallengeStatus("Enter a challenge code first.");
+        return;
+      }
+
+      try {
+        const data = await api("/api/join", { code, name: getName() });
+        applyRoom(data.room, data.playerId, "Joined challenge. Start typing when ready.");
+      } catch (error) {
+        setChallengeStatus(error.message);
+      }
+    }
+
+    async function loadRoom() {
+      if (!challenge.code) return;
+      try {
+        const room = await api("/api/room?code=" + encodeURIComponent(challenge.code));
+        renderPlayers(room);
+      } catch (error) {
+        setChallengeStatus("Challenge room is no longer available.");
+        stopPolling();
+      }
+    }
+
+    async function sendProgress(force) {
+      if (!challenge.code || !challenge.playerId) return;
+      const now = Date.now();
+      if (!force && now - challenge.lastSent < 450) return;
+      challenge.lastSent = now;
+
+      const stats = getStats();
+      try {
+        await api("/api/progress", {
+          code: challenge.code,
+          playerId: challenge.playerId,
+          name: getName(),
+          wpm: stats.wpm,
+          acc: stats.acc,
+          errors: stats.errors,
+          progress: stats.progress,
+          done: finished
+        });
+        loadRoom();
+      } catch {
+        setChallengeStatus("Could not send progress to the server.");
+      }
+    }
+
+    function renderPlayers(room) {
+      const players = room.players || [];
+      const winner = players.find((player) => player.done);
+
+      if (!players.length) {
+        playersEl.innerHTML = '<div class="empty">Waiting for players.</div>';
+        return;
+      }
+
+      playersEl.innerHTML = players.map((player) => `
+        <div class="player">
+          <div class="player-top">
+            <span>${escapeHtml(player.name)}</span>
+            <span>${player.done ? "finished" : player.progress + "%"}</span>
+          </div>
+          <div class="player-meta">${player.wpm} wpm • ${player.acc}% acc • ${player.errors} errors</div>
+          <div class="meter"><span style="width:${Math.max(0, Math.min(100, player.progress))}%"></span></div>
+        </div>
+      `).join("");
+
+      if (winner) {
+        setChallengeStatus(winner.name + " finished first.");
+        if (celebratedWinner !== challenge.code + ":" + winner.name) {
+          celebratedWinner = challenge.code + ":" + winner.name;
+          celebrateWinner(winner.name);
+        }
+      }
+    }
+
+    modeBtns.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode, true));
+    });
+
+    timeBtns.forEach((button) => {
+      button.addEventListener("click", () => setDuration(Number(button.dataset.time), true));
+    });
+
+    restartBtn.addEventListener("click", () => reset(challenge.code ? text : undefined));
+    againBtn.addEventListener("click", () => reset(challenge.code ? text : undefined));
+    inputEl.addEventListener("input", handleInput);
+    box.addEventListener("click", () => inputEl.focus());
+    createChallengeBtn.addEventListener("click", createChallenge);
+    joinChallengeBtn.addEventListener("click", joinChallenge);
+    leaveChallengeBtn.addEventListener("click", () => leaveChallenge("Left the challenge."));
+    copyCodeBtn.addEventListener("click", async () => {
+      if (!challenge.code) {
+        setChallengeStatus("Create or join a challenge first.");
+        return;
+      }
+      await navigator.clipboard.writeText(challenge.code);
+      setChallengeStatus("Code copied.");
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (["INPUT", "BUTTON"].includes(event.target.tagName)) return;
+      inputEl.focus();
+    });
+
+    reset();
+  </script>
+</body>
+</html>
