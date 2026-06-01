@@ -50,13 +50,6 @@ Compete with friends or other users:
 - Mobile-friendly layout
 
 ---
-
-## 🖼️ Preview
-
-<img src="./screenshot.png" alt="TypeFlow Preview" width="100%" />
-
----
-
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -65,11 +58,6 @@ Compete with friends or other users:
 - Tailwind CSS
 - Framer Motion
 
-### Backend
-- Node.js
-- Express.js
-
-- 
 ## 📂 Project Structure
 
 ```bash
