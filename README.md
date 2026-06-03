@@ -1,4 +1,6 @@
-# Typingwith-firend
+# Typing-with-firend
+
+Test your self 
 
 # ⌨️ TypeFlow – Modern Typing Practice & Challenge Platform
  
