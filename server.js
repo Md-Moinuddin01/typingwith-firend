@@ -1,4 +1,4 @@
-const http = require("node:http");
+const https = require("node:https");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
@@ -224,8 +224,8 @@ setInterval(() => {
 }, 60 * 1000);
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`TypeFlow running at http://localhost:${port}`);
+  console.log(`TypeFlow running at https://localhost:${port}`);
   for (const address of getLanAddresses()) {
-    console.log(`Other devices on your network can try http://${address}:${port}`);
+    console.log(`Other devices on your network can try https://${address}:${port}`);
   }
 });
